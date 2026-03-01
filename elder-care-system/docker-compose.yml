@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: elder-care-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /dev/video0:/dev/video0 # Linux mapping for webcam
+    devices:
+      - /dev/video0:/dev/video0 # Allow Docker access to webcam
+    environment:
+      - DATABASE_URL=sqlite:///./elder_care.db
+      - SECRET_KEY=ElderCareSecret2026
+      - LINE_CHANNEL_ACCESS_TOKEN=${LINE_CHANNEL_ACCESS_TOKEN}
+      - LINE_USER_ID=${LINE_USER_ID}
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: elder-care-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
